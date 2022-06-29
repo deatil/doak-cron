@@ -8,6 +8,7 @@ import (
     "github.com/urfave/cli/v2"
 
     "github.com/deatil/doak-cron/pkg/cron"
+    "github.com/deatil/doak-cron/pkg/curl"
     "github.com/deatil/doak-cron/pkg/logger"
 )
 
@@ -31,6 +32,14 @@ func main() {
             Action: func(c *cli.Context) error {
                 fmt.Println("debug:", c.Bool("debug"))
                 fmt.Println("conf:", c.String("conf"))
+
+                http := curl.CreateClient(
+                    curl.WithBaseURI("http://test.test1000.com"),
+                )
+
+                resp, _ := http.Get("/12.php", curl.WithTimeout(35))
+                respData, _ := resp.GetContents()
+                fmt.Println("请求结果为: " + respData)
 
                 cron.AddCrons(map[string]func(){
                     "*/5 * * * * *": func() {
