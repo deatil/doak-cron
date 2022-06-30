@@ -14,11 +14,11 @@ import (
 
 // 响应
 type Response struct {
-    resp          *http.Response
-    req           *http.Request
-    cookiesJar    *cookiejar.Jar
-    err           error
-    setResCharset string
+    resp       *http.Response
+    req        *http.Request
+    cookiesJar *cookiejar.Jar
+    err        error
+    charset    string
 }
 
 // 获取服务端生成的全部cookies
@@ -72,7 +72,7 @@ func (this *Response) GetContents() (bodyStr string, err error) {
         bodyStr = mahonia.NewDecoder("GB18030").ConvertString(string(body))
     } else {
         //程序没有从对方响应 Header["Content-Type"] 检测到编码类型，那么需要请求者手动设置对方的站点编码
-        if decoder := mahonia.NewDecoder(this.setResCharset); decoder != nil {
+        if decoder := mahonia.NewDecoder(this.charset); decoder != nil {
             bodyStr = decoder.ConvertString(string(body))
         } else {
             return "", errors.New(charsetDecoderError)

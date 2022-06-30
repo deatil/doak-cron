@@ -43,8 +43,13 @@ func CreateClient(opts ...Opt) *Request {
         },
     }
 
+    // 默认
+    newOpts := []Opt{
+        WithHeaders(defaultHeader),
+    }
+
     // 合并默认
-    opts = append([]Opt{WithHeaders(defaultHeader)}, opts...)
+    opts = append(newOpts, opts...)
 
     // 设置
     for _, opt := range opts {

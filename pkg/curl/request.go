@@ -21,12 +21,12 @@ import (
 
 // 请求
 type Request struct {
-    opts                 *Options
-    cli                  *http.Client
-    req                  *http.Request
-    body                 io.Reader
-    subGetFormDataParams string
-    cookiesJar           *cookiejar.Jar
+    opts              *Options
+    cli               *http.Client
+    req               *http.Request
+    body              io.Reader
+    subFormDataParams string
+    cookiesJar        *cookiejar.Jar
 }
 
 // Get send get request
@@ -141,18 +141,25 @@ func (this *Request) Request(method, uri string, opts ...Opt) (*Response, error)
 
     switch method {
         case http.MethodGet, http.MethodDelete:
-            uri = this.opts.BaseURI + uri + this.parseGetFormData()
-            req, err := http.NewRequest(method, uri, nil)
+            // 解析链接
+            url := this.parseUrl(uri, this.parseFormData())
+
+            // 请求
+            req, err := http.NewRequest(method, url, nil)
             if err != nil {
                 return nil, err
             }
 
             this.req = req
         case http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodOptions:
-            // parse body
+            // 解析内容
             this.parseBody()
-            uri = this.opts.BaseURI + uri + this.parseGetFormData()
-            req, err := http.NewRequest(method, uri, this.body)
+
+            // 解析链接
+            url := this.parseUrl(uri, "")
+
+            // 请求
+            req, err := http.NewRequest(method, url, this.body)
             if err != nil {
                 return nil, err
             }
@@ -179,11 +186,11 @@ func (this *Request) Request(method, uri string, opts ...Opt) (*Response, error)
     httpResp, err := this.cli.Do(this.req)
 
     resp := &Response{
-        resp:          httpResp,
-        req:           this.req,
-        cookiesJar:    this.cookiesJar,
-        err:           err,
-        setResCharset: this.opts.SetResCharset,
+        resp:       httpResp,
+        req:        this.req,
+        cookiesJar: this.cookiesJar,
+        err:        err,
+        charset:    this.opts.ResCharset,
     }
 
     if err != nil {
@@ -191,6 +198,28 @@ func (this *Request) Request(method, uri string, opts ...Opt) (*Response, error)
     }
 
     return resp, nil
+}
+
+// 格式化链接
+func (this *Request) parseUrl(uri string, params string) string {
+    url := ""
+
+    if this.opts.BaseURI != "" {
+        url = strings.TrimSuffix(this.opts.BaseURI, "/")
+        url = url + "/" + strings.TrimPrefix(uri, "/")
+    } else {
+        url = uri
+    }
+
+    if strings.Contains(url, "?") {
+        url = url + "&"
+    } else {
+        url = url + "?"
+    }
+
+    url = url + params
+
+    return url
 }
 
 func (this *Request) parseTimeout() {
@@ -307,7 +336,7 @@ func (this *Request) parseBody() {
 }
 
 // 解析 get 方式传递的 formData(application/x-www-form-urlencoded)
-func (this *Request) parseGetFormData() string {
+func (this *Request) parseFormData() string {
     if this.opts.FormParams == nil {
         return ""
     }
@@ -325,9 +354,9 @@ func (this *Request) parseGetFormData() string {
         vv := fmt.Sprintf("%v", v)
         values.Set(k, vv)
     }
-    this.subGetFormDataParams = values.Encode()
+    this.subFormDataParams = values.Encode()
 
-    return "?" + this.subGetFormDataParams
+    return this.subFormDataParams
 }
 
 //（接受到的）简体中文 转换为 utf-8

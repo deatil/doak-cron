@@ -1,0 +1,23 @@
+[
+    {
+        "type":"cmd",
+        "spec":"*/5 * * * * *",
+        "cmd":"main.exe"
+    },
+    {
+        "type":"request",
+        "spec":"*/5 * * * * *",
+        "url":"http://test.test1000.com/12.php",
+        "method":"get",
+        "timeout":"35",
+        "params":{
+            "a": "a data"
+        },
+        "headers":{
+            "a": "a data"
+        },
+        "proxy":"",
+        "cookies":"",
+        "charset":""
+    }
+]

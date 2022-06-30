@@ -6,19 +6,26 @@ import (
 
 // Options object
 type Options struct {
-    Headers       map[string]any
-    BaseURI       string
-    FormParams    map[string]any
-    JSON          any
-    XML           string
-    Timeout       float32
-    Cookies       any
-    Proxy         string
-    SetResCharset string
+    Headers    map[string]any
+    BaseURI    string
+    FormParams map[string]any
+    JSON       any
+    XML        string
+    Timeout    float32
+    Cookies    any
+    Proxy      string
+    ResCharset string
 }
 
 // 设置
 type Opt func(*Options)
+
+// 设置 BaseURI
+func WithBaseURI(data string) Opt {
+    return func(opt *Options) {
+        opt.BaseURI = data
+    }
+}
 
 // 设置 Headers
 func WithHeaders(data map[string]any) Opt {
@@ -26,13 +33,6 @@ func WithHeaders(data map[string]any) Opt {
         for k, v := range data {
             opt.Headers[k] = fmt.Sprintf("%v", v)
         }
-    }
-}
-
-// 设置 BaseURI
-func WithBaseURI(data string) Opt {
-    return func(opt *Options) {
-        opt.BaseURI = data
     }
 }
 
@@ -57,14 +57,12 @@ func WithCookies(data any) Opt {
     }
 }
 
-// 设置 SetResCharset
-func WithSetResCharset(data string) Opt {
+// 设置 ResCharset
+func WithResCharset(data string) Opt {
     return func(opt *Options) {
-        opt.SetResCharset = data
+        opt.ResCharset = data
     }
 }
-
-// =============
 
 // 设置 FormParams
 func WithFormParams(data map[string]any) Opt {

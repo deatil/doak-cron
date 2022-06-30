@@ -6,6 +6,14 @@ import (
     "github.com/robfig/cron/v3"
 )
 
+type Option struct {
+    // 时间
+    Spec string
+
+    // 脚本
+    Cmd func()
+}
+
 // 添加计划任务
 func AddCron(fn func(*cron.Cron)) {
     // 创建一个cron实例
@@ -23,16 +31,14 @@ func AddCron(fn func(*cron.Cron)) {
 }
 
 // 添加计划任务
-func AddCrons(fns map[string]func()) {
+func AddCrons(opts []Option) {
     AddCron(func(croner *cron.Cron) {
-        if len(fns) > 0 {
-            for spec, cmd := range fns {
-                enterId, err := croner.AddFunc(spec, cmd)
+        if len(opts) > 0 {
+            for _, opt := range opts {
+                _, err := croner.AddFunc(opt.Spec, opt.Cmd)
                 if err != nil{
                     fmt.Println(err)
                 }
-
-                fmt.Printf("任务id为: %d \n", enterId)
             }
         }
     })

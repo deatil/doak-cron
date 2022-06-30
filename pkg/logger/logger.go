@@ -60,15 +60,17 @@ func (w *LevelConsoleWriter) WriteLevel(l zerolog.Level, p []byte) (n int, err e
 // Log().Fatal().Msg("test FATAL")
 func Log() *zerolog.Logger {
     once.Do(func() {
-        log = Manager()
+        file := "./cron.log"
+
+        log = Manager(file)
     })
 
     return log
 }
 
 // 日志管理
-func Manager() *zerolog.Logger {
-    errorFile, _ := os.OpenFile("./cron.log", os.O_APPEND|os.O_CREATE|os.O_RDWR, 0666)
+func Manager(file string) *zerolog.Logger {
+    errorFile, _ := os.OpenFile(file, os.O_APPEND|os.O_CREATE|os.O_RDWR, 0666)
 
     newLog := zerolog.New(zerolog.MultiLevelWriter(
             // Trace 日志写入 cron.log
@@ -101,12 +103,16 @@ func Manager() *zerolog.Logger {
                 lw: errorFile,
                 lv: zerolog.FatalLevel,
             },
-            // Debug, Error 日志显示在控制台
+            // Panic 日志写入 cron.log
+            &LevelFileWriter{
+                lw: errorFile,
+                lv: zerolog.PanicLevel,
+            },
+            // Debug, Fatal 日志显示在控制台
             &LevelConsoleWriter{
                 lw: zerolog.ConsoleWriter{Out: os.Stdout},
                 lv: []zerolog.Level{
                     zerolog.DebugLevel,
-                    zerolog.ErrorLevel,
                 },
             },
         )).
