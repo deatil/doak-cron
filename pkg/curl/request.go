@@ -9,24 +9,28 @@ import (
     "bufio"
     "bytes"
     "errors"
+    "strconv"
+    "reflect"
     "crypto/tls"
-    "encoding/json"
     "net/http"
     "net/http/cookiejar"
     "net/url"
     "strings"
+    "encoding/json"
+    "html/template"
+    "mime/multipart"
 
     "github.com/axgle/mahonia"
 )
 
 // 请求
 type Request struct {
-    opts              *Options
-    cli               *http.Client
-    req               *http.Request
-    body              io.Reader
-    subFormDataParams string
-    cookiesJar        *cookiejar.Jar
+    opts       *Options
+    cli        *http.Client
+    req        *http.Request
+    body       io.Reader
+    Params     string
+    cookiesJar *cookiejar.Jar
 }
 
 // Get send get request
@@ -132,42 +136,30 @@ func (this *Request) saveFile(body io.ReadCloser, fileName string) (bool, error)
 }
 
 // Request send request
-func (this *Request) Request(method, uri string, opts ...Opt) (*Response, error) {
+func (this *Request) Request(method string, uri string, opts ...Opt) (*Response, error) {
     if len(opts) > 0 {
         for _, opt := range opts{
             opt(this.opts)
         }
     }
 
-    switch method {
-        case http.MethodGet, http.MethodDelete:
-            // 解析链接
-            url := this.parseUrl(uri, this.parseFormData())
+    // http.MethodGet, http.MethodDelete
+    // http.MethodPost, http.MethodPut,
+    // http.MethodPatch, http.MethodOptions
 
-            // 请求
-            req, err := http.NewRequest(method, url, nil)
-            if err != nil {
-                return nil, err
-            }
+    // 解析链接
+    url := this.parseUrl(uri, this.parseParams())
 
-            this.req = req
-        case http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodOptions:
-            // 解析内容
-            this.parseBody()
+    // 解析内容
+    this.parseBody()
 
-            // 解析链接
-            url := this.parseUrl(uri, "")
-
-            // 请求
-            req, err := http.NewRequest(method, url, this.body)
-            if err != nil {
-                return nil, err
-            }
-
-            this.req = req
-        default:
-            return nil, errors.New("invalid request method")
+    // 请求
+    req, err := http.NewRequest(method, url, this.body)
+    if err != nil {
+        return nil, err
     }
+
+    this.req = req
 
     this.opts.Headers["Host"] = fmt.Sprintf("%v", this.req.Host)
 
@@ -183,6 +175,7 @@ func (this *Request) Request(method, uri string, opts ...Opt) (*Response, error)
     // parse cookies
     this.parseCookies()
 
+    // 执行请求
     httpResp, err := this.cli.Do(this.req)
 
     resp := &Response{
@@ -242,6 +235,11 @@ func (this *Request) parseClient() {
         }
     }
 
+    // 额外设置
+    tr.MaxIdleConns = this.opts.MaxIdleConns
+    tr.MaxConnsPerHost = this.opts.MaxConnsPerHost
+    tr.MaxIdleConnsPerHost = this.opts.MaxIdleConnsPerHost
+
     // 过期时间
     timeout := time.Duration(this.opts.Timeout*1000) * time.Millisecond
 
@@ -296,53 +294,101 @@ func (this *Request) parseHeaders() {
 }
 
 func (this *Request) parseBody() {
-    // application/x-www-form-urlencoded
-    if this.opts.FormParams != nil {
-        values := url.Values{}
-        for k, v := range this.opts.FormParams {
-            if vv, ok := v.([]string); ok {
-                for _, vvv := range vv {
-                    if strings.ReplaceAll(vvv, " ", "") != "" {
-                        values.Add(k, vvv)
+    if this.opts.Body == nil {
+        return
+    }
+
+    switch this.opts.Body.(type) {
+        // application/x-www-form-urlencoded
+        // application/json
+        case map[string]any:
+            data := this.opts.Body.(map[string]any)
+
+            values := url.Values{}
+            for k, v := range data {
+                if vv, ok := v.([]string); ok {
+                    for _, vvv := range vv {
+                        if strings.ReplaceAll(vvv, " ", "") != "" {
+                            values.Add(k, vvv)
+                        }
                     }
+                    continue
                 }
-                continue
+                vv := fmt.Sprintf("%v", v)
+                values.Set(k, vv)
             }
-            vv := fmt.Sprintf("%v", v)
-            values.Set(k, vv)
-        }
-        this.body = strings.NewReader(values.Encode())
 
-        return
+            this.body = strings.NewReader(values.Encode())
+        // 上传文件
+        case string:
+            data := this.opts.Body.(string)
+
+            if strings.HasPrefix(data, "@") {
+                newData := data[1:]
+
+                newDatas := strings.Split(newData, "|")
+                if len(newDatas) != 2 {
+                    fmt.Println("parseBody err: 数据错误")
+                    return
+                }
+
+                paramName := newDatas[0]
+                filePath := newDatas[1]
+
+                // 打开要上传的文件
+                file, err := os.Open(filePath)
+                if err != nil {
+                    fmt.Println("parseBody err: ", err)
+                    return
+                }
+
+                defer file.Close()
+
+                body := &bytes.Buffer{}
+                // 创建一个multipart类型的写文件
+                writer := multipart.NewWriter(body)
+
+                // 使用给出的属性名paramName和文件名filePath创建一个新的form-data头
+                part, err := writer.CreateFormFile(paramName, filePath)
+                if err != nil {
+                    fmt.Println("parseBody err: ", err)
+                    return
+                }
+
+                // 将源复制到目标，将file写入到part
+                // 是按默认的缓冲区32k循环操作的，
+                // 不会将内容一次性全写入内存中,
+                // 这样就能解决大文件的问题
+                _, err = io.Copy(part, file)
+                err = writer.Close()
+                if err != nil {
+                    fmt.Println("parseBody err: ", err)
+                    return
+                }
+
+                this.body = body
+
+                this.opts.Headers["Content-Type"] = writer.FormDataContentType()
+            } else {
+                this.body = strings.NewReader(data)
+            }
+
+        // text/xml
+        default:
+            data := this.ToString(this.opts.Body)
+
+            this.body = strings.NewReader(data)
     }
-
-    // application/json
-    if this.opts.JSON != nil {
-        b, err := json.Marshal(this.opts.JSON)
-        if err == nil {
-            this.body = bytes.NewReader(b)
-
-            return
-        }
-    }
-
-    // text/xml
-    if this.opts.XML != "" {
-        this.body = strings.NewReader(this.opts.XML)
-        return
-    }
-
-    return
 }
 
 // 解析 get 方式传递的 formData(application/x-www-form-urlencoded)
-func (this *Request) parseFormData() string {
-    if this.opts.FormParams == nil {
+func (this *Request) parseParams() string {
+    if this.opts.Params == nil {
         return ""
     }
 
     values := url.Values{}
-    for k, v := range this.opts.FormParams {
+    for k, v := range this.opts.Params {
         if vv, ok := v.([]string); ok {
             for _, vvv := range vv {
                 if strings.ReplaceAll(vvv, " ", "") != "" {
@@ -354,9 +400,9 @@ func (this *Request) parseFormData() string {
         vv := fmt.Sprintf("%v", v)
         values.Set(k, vv)
     }
-    this.subFormDataParams = values.Encode()
+    this.Params = values.Encode()
 
-    return this.subFormDataParams
+    return this.Params
 }
 
 //（接受到的）简体中文 转换为 utf-8
@@ -370,5 +416,79 @@ func (this *Request) Utf8ToSimpleChinese(vBytes []byte, charset ...string) strin
         return mahonia.NewEncoder("GB18030").ConvertString(string(vBytes))
     } else {
         return mahonia.NewEncoder(charset[0]).ConvertString(string(vBytes))
+    }
+}
+
+func (this *Request) indirectToStringerOrError(a interface{}) interface{} {
+    if a == nil {
+        return nil
+    }
+
+    var errorType = reflect.TypeOf((*error)(nil)).Elem()
+    var fmtStringerType = reflect.TypeOf((*fmt.Stringer)(nil)).Elem()
+
+    v := reflect.ValueOf(a)
+    for !v.Type().Implements(fmtStringerType) && !v.Type().Implements(errorType) && v.Kind() == reflect.Ptr && !v.IsNil() {
+        v = v.Elem()
+    }
+
+    return v.Interface()
+}
+
+// 转换为字符
+func (this *Request) ToString(i interface{}) string {
+    i = this.indirectToStringerOrError(i)
+
+    switch s := i.(type) {
+        case string:
+            return s
+        case bool:
+            return strconv.FormatBool(s)
+        case float64:
+            return strconv.FormatFloat(s, 'f', -1, 64)
+        case float32:
+            return strconv.FormatFloat(float64(s), 'f', -1, 32)
+        case int:
+            return strconv.Itoa(s)
+        case int64:
+            return strconv.FormatInt(s, 10)
+        case int32:
+            return strconv.Itoa(int(s))
+        case int16:
+            return strconv.FormatInt(int64(s), 10)
+        case int8:
+            return strconv.FormatInt(int64(s), 10)
+        case uint:
+            return strconv.FormatUint(uint64(s), 10)
+        case uint64:
+            return strconv.FormatUint(uint64(s), 10)
+        case uint32:
+            return strconv.FormatUint(uint64(s), 10)
+        case uint16:
+            return strconv.FormatUint(uint64(s), 10)
+        case uint8:
+            return strconv.FormatUint(uint64(s), 10)
+        case json.Number:
+            return s.String()
+        case []byte:
+            return string(s)
+        case template.HTML:
+            return string(s)
+        case template.URL:
+            return string(s)
+        case template.JS:
+            return string(s)
+        case template.CSS:
+            return string(s)
+        case template.HTMLAttr:
+            return string(s)
+        case nil:
+            return ""
+        case fmt.Stringer:
+            return s.String()
+        case error:
+            return s.Error()
+        default:
+            return ""
     }
 }

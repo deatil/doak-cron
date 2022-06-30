@@ -103,11 +103,16 @@ func MakeRequest(data map[string]any, debug bool) func() {
         cookies := cast.ToString(data["cookies"])
         charset := cast.ToString(data["charset"])
 
+        body, bodyOk := data["body"]
+
         if timeout > 0 {
             opts = append(opts, curl.WithTimeout(timeout))
         }
         if len(params) > 0 {
-            opts = append(opts, curl.WithFormParams(params))
+            opts = append(opts, curl.WithParams(params))
+        }
+        if bodyOk {
+            opts = append(opts, curl.WithBody(body))
         }
         if len(headers) > 0 {
             opts = append(opts, curl.WithHeaders(headers))

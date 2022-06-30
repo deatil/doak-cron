@@ -8,13 +8,16 @@ import (
 type Options struct {
     Headers    map[string]any
     BaseURI    string
-    FormParams map[string]any
-    JSON       any
-    XML        string
+    Params     map[string]any
+    Body       any
     Timeout    float32
     Cookies    any
     Proxy      string
     ResCharset string
+
+    MaxIdleConns        int
+    MaxConnsPerHost     int
+    MaxIdleConnsPerHost int
 }
 
 // 设置
@@ -64,23 +67,37 @@ func WithResCharset(data string) Opt {
     }
 }
 
-// 设置 FormParams
-func WithFormParams(data map[string]any) Opt {
+// 设置 Params
+func WithParams(data map[string]any) Opt {
     return func(opt *Options) {
-        opt.FormParams = data
+        opt.Params = data
     }
 }
 
-// 设置 JSON
-func WithJSON(data any) Opt {
+// 设置 Body
+func WithBody(data any) Opt {
     return func(opt *Options) {
-        opt.JSON = data
+        opt.Body = data
     }
 }
 
-// 设置 XML
-func WithXML(data string) Opt {
+// 设置 MaxIdleConns
+func WithMaxIdleConns(data int) Opt {
     return func(opt *Options) {
-        opt.XML = data
+        opt.MaxIdleConns = data
+    }
+}
+
+// 设置 MaxConnsPerHost
+func WithMaxConnsPerHost(data int) Opt {
+    return func(opt *Options) {
+        opt.MaxConnsPerHost = data
+    }
+}
+
+// 设置 MaxIdleConnsPerHost
+func WithMaxIdleConnsPerHost(data int) Opt {
+    return func(opt *Options) {
+        opt.MaxIdleConnsPerHost = data
     }
 }

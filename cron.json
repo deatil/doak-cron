@@ -13,11 +13,22 @@
         "params":{
             "a": "a data"
         },
+        "body":{
+            "a": "a data"
+        },
         "headers":{
             "a": "a data"
         },
         "proxy":"",
         "cookies":"",
         "charset":""
+    },
+    {
+        "type":"request",
+        "spec":"*/6 * * * * *",
+        "url":"http://test.test1000.com/13.php",
+        "method":"post",
+        "timeout":"35",
+        "body":"@file|./cron.log"
     }
 ]

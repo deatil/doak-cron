@@ -14,8 +14,9 @@ import (
 // 版本号
 var version = "1.0.1"
 
-// go run main.go cron --conf="./cron.json" --debug
-// go run main.go cron ver
+// go版本的通用计划任务
+// > go run main.go cron --conf="./cron.json" --debug
+// > go run main.go cron ver
 func main() {
     app := cli.NewApp()
     app.EnableBashCompletion = true
@@ -38,6 +39,8 @@ func main() {
                     return nil
                 }
 
+                fmt.Println("任务开始执行...")
+
                 newCrons := make([]cron.Option, 0)
                 for _, v := range crons {
                     for kk, vv := range v {
@@ -48,7 +51,7 @@ func main() {
                     }
                 }
 
-                fmt.Println("任务开始执行...")
+                fmt.Println("任务执行中")
 
                 cron.AddCrons(newCrons)
 

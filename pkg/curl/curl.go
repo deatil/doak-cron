@@ -38,14 +38,17 @@ func CreateClient(opts ...Opt) *Request {
     req := &Request{
         cli:  client,
         opts: &Options{
-            Headers:    make(map[string]any, 0),
-            FormParams: make(map[string]any, 0),
+            Headers: make(map[string]any, 0),
+            Params:  make(map[string]any, 0),
         },
     }
 
     // 默认
     newOpts := []Opt{
         WithHeaders(defaultHeader),
+        WithMaxIdleConns(100),
+        WithMaxConnsPerHost(100),
+        WithMaxIdleConnsPerHost(100),
     }
 
     // 合并默认
