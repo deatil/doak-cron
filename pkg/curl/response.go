@@ -2,23 +2,38 @@ package curl
 
 import (
     "io"
+    "fmt"
     "net"
     "net/http"
     "net/http/cookiejar"
-    "fmt"
     "errors"
     "strings"
 
     "github.com/axgle/mahonia"
 )
 
-// 响应
+/**
+ * 响应
+ *
+ * @create 2022-6-29
+ * @author deatil
+ */
 type Response struct {
     resp       *http.Response
     req        *http.Request
     cookiesJar *cookiejar.Jar
     err        error
     charset    string
+}
+
+// GetRequest get request object
+func (this *Response) GetRequest() *http.Request {
+    return this.req
+}
+
+// GetRequest get request object
+func (this *Response) GetResponse() *http.Response {
+    return this.resp
 }
 
 // 获取服务端生成的全部cookies
@@ -40,17 +55,7 @@ func (this *Response) GetCookie(cookieName string) *http.Cookie {
     return nil
 }
 
-// GetRequest get request object
-func (this *Response) GetRequest() *http.Request {
-    return this.req
-}
-
-// GetRequest get request object
-func (this *Response) GetResponse() *http.Response {
-    return this.resp
-}
-
-// GetBody parse response body
+// 获取内容
 func (this *Response) GetContents() (bodyStr string, err error) {
     defer func() {
         _ = this.resp.Body.Close()
@@ -71,7 +76,7 @@ func (this *Response) GetContents() (bodyStr string, err error) {
     } else if strings.Contains(strings.ToLower(temp), "gb") {
         bodyStr = mahonia.NewDecoder("GB18030").ConvertString(string(body))
     } else {
-        //程序没有从对方响应 Header["Content-Type"] 检测到编码类型，那么需要请求者手动设置对方的站点编码
+        // 程序没有从对方响应 Header["Content-Type"] 检测到编码类型，那么需要请求者手动设置对方的站点编码
         if decoder := mahonia.NewDecoder(this.charset); decoder != nil {
             bodyStr = decoder.ConvertString(string(body))
         } else {
@@ -90,7 +95,7 @@ func (this *Response) GetContentLength() int64 {
 
 // GetBody parse response body
 func (this *Response) GetBody() io.ReadCloser {
-    //defer this.resp.Body.Close()
+    // defer this.resp.Body.Close()
 
     return this.resp.Body
 }
@@ -113,10 +118,12 @@ func (this *Response) IsTimeout() bool {
     if this.err == nil {
         return false
     }
+
     netErr, ok := this.err.(net.Error)
     if !ok {
         return false
     }
+
     if netErr.Timeout() {
         return true
     }

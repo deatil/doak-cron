@@ -4,7 +4,12 @@ import (
     "fmt"
 )
 
-// Options object
+/**
+ * 选项
+ *
+ * @create 2022-6-29
+ * @author deatil
+ */
 type Options struct {
     Headers    map[string]any
     BaseURI    string
@@ -61,6 +66,7 @@ func WithCookies(data any) Opt {
 }
 
 // 设置 ResCharset
+// 可选值(GB18030、GBK、utf-8等)
 func WithResCharset(data string) Opt {
     return func(opt *Options) {
         opt.ResCharset = data

@@ -127,8 +127,12 @@ func MakeRequest(data map[string]any, debug bool) func() {
             opts = append(opts, curl.WithResCharset(charset))
         }
 
-        resp, err := curl.CreateClient().Request(
-            strings.ToUpper(method),
+        // 方法名大写
+        method = strings.ToUpper(method)
+
+        // 请求
+        resp, err := curl.New().Request(
+            method,
             url,
             opts...,
         )

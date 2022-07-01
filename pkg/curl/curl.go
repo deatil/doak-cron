@@ -6,11 +6,11 @@ import (
     "net/http/cookiejar"
 )
 
-var curSiteCookiesJar, _ = cookiejar.New(nil)
+var httpCookiesJar, _ = cookiejar.New(nil)
 var httpClient = sync.Pool{
     New: func() any {
         return &http.Client{
-            Jar: curSiteCookiesJar,
+            Jar: httpCookiesJar,
         }
     },
 }
@@ -28,6 +28,11 @@ var defaultHeader = map[string]any{
     "Connection":                "keep-alive",
     "Cache-Control":             "max-age=0",
     "Host":                      "",
+}
+
+// 创建一个 HttpClient 客户端
+func New(opts ...Opt) *Request {
+    return CreateClient(opts...)
 }
 
 // 创建一个 HttpClient 客户端用于发送请求
@@ -59,7 +64,7 @@ func CreateClient(opts ...Opt) *Request {
         opt(req.opts)
     }
 
-    req.cookiesJar = curSiteCookiesJar
+    req.cookiesJar = httpCookiesJar
 
     return req
 }

@@ -23,7 +23,12 @@ import (
     "github.com/axgle/mahonia"
 )
 
-// 请求
+/**
+ * 请求
+ *
+ * @create 2022-6-29
+ * @author deatil
+ */
 type Request struct {
     opts       *Options
     cli        *http.Client

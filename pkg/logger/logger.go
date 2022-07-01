@@ -1,7 +1,6 @@
 package logger
 
 import (
-    "io"
     "os"
     "sync"
 
@@ -13,44 +12,6 @@ var (
 
     once sync.Once
 )
-
-// LevelFileWriter 指定级别的日志写文件
-type LevelFileWriter struct {
-    lw io.Writer
-    lv zerolog.Level
-}
-
-func (w *LevelFileWriter) Write(p []byte) (n int, err error) {
-    return w.lw.Write(p)
-}
-
-func (w *LevelFileWriter) WriteLevel(l zerolog.Level, p []byte) (n int, err error) {
-    if l == w.lv {
-        return w.lw.Write(p)
-    }
-
-    return len(p), nil
-}
-
-// LevelConsoleWriter 特定级别日志写到控制台
-type LevelConsoleWriter struct {
-    lw zerolog.ConsoleWriter
-    lv []zerolog.Level
-}
-
-func (w *LevelConsoleWriter) Write(p []byte) (n int, err error) {
-    return w.lw.Write(p)
-}
-
-func (w *LevelConsoleWriter) WriteLevel(l zerolog.Level, p []byte) (n int, err error) {
-    for _, v := range w.lv {
-        if v == l {
-            return w.lw.Write(p)
-        }
-    }
-
-    return len(p), nil
-}
 
 // Log().Trace().Msg("test TRACE")
 // Log().Debug().Msg("test DEBUG")
