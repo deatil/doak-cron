@@ -12,7 +12,7 @@ import (
 )
 
 // 版本号
-var version = "1.0.1"
+var version = "1.0.2"
 
 /**
  * go版本的通用计划任务

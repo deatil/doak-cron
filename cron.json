@@ -9,19 +9,24 @@
         "spec":"*/5 * * * * *",
         "url":"http://test.test1000.com/12.php",
         "method":"get",
-        "timeout":"35",
+        "timeout":"1",
         "params":{
             "a": "a data"
         },
+        "query_string":"productId=232",
         "body":{
-            "a": "a data"
+            "a": "a body data"
+        },
+        "form_data":{
+            "b": "b data"
         },
         "headers":{
-            "a": "a data"
+            "a": "a headers data"
         },
         "proxy":"",
-        "cookies":"",
-        "charset":""
+        "cookies":{
+            "cookie_a": "cookie_a data"
+        }
     },
     {
         "type":"request",
@@ -29,6 +34,8 @@
         "url":"http://test.test1000.com/13.php",
         "method":"post",
         "timeout":"35",
-        "body":"@file|./cron.log"
+        "files":{
+            "file": "./cron.log"
+        }
     }
 ]

@@ -41,6 +41,8 @@ main.exe cron ver
 
  - github.com/robfig/cron
 
+ - github.com/go-resty/resty
+
  - github.com/rs/zerolog
 
  - github.com/spf13/cast

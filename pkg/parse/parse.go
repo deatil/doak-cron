@@ -1,13 +1,16 @@
 package parse
 
 import (
+    "time"
+    "errors"
     "strings"
+    "net/http"
 
     "github.com/spf13/cast"
+    "github.com/go-resty/resty/v2"
     jsoniter "github.com/json-iterator/go"
 
     "github.com/deatil/doak-cron/pkg/cmd"
-    "github.com/deatil/doak-cron/pkg/curl"
     "github.com/deatil/doak-cron/pkg/utils"
     "github.com/deatil/doak-cron/pkg/logger"
 )
@@ -91,58 +94,117 @@ func MakeRequest(data map[string]any, debug bool) func() {
             return
         }
 
-        opts := make([]curl.Opt, 0)
-
         method := cast.ToString(data["method"])
         url := cast.ToString(data["url"])
 
-        timeout := cast.ToFloat32(data["timeout"])
-        params := cast.ToStringMap(data["params"])
-        headers := cast.ToStringMap(data["headers"])
-        proxy := cast.ToString(data["proxy"])
-        cookies := cast.ToString(data["cookies"])
-        charset := cast.ToString(data["charset"])
+        timeout := cast.ToDuration(data["timeout"])
+        params := cast.ToStringMapString(data["params"])
+        queryString := cast.ToString(data["query_string"])
+        headers := cast.ToStringMapString(data["headers"])
+        proxyData := cast.ToString(data["proxy"])
+        cookies := cast.ToStringMapString(data["cookies"])
+        files := cast.ToStringMapString(data["files"])
+        formDatas := cast.ToStringMapString(data["form_data"])
 
         body, bodyOk := data["body"]
 
+        // 创建客户端
+        client := resty.New()
+
+        // 过期时间
         if timeout > 0 {
-            opts = append(opts, curl.WithTimeout(timeout))
+            client.SetTimeout(time.Duration(timeout * time.Minute))
         }
+
+        // 代理
+        if proxyData != "" {
+            // 设置代理
+            // proxy = "127.0.0.1:9150"
+            client.SetProxy(proxyData)
+
+            // 移除代理
+            // client.RemoveProxy()
+        }
+
+        // 请求前
+        client.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
+            return nil
+        })
+
+        // 相应后
+        client.OnAfterResponse(func(c *resty.Client, resp *resty.Response) error {
+            return nil
+        })
+
+        // 重试
+        client.
+            SetRetryCount(3).
+            SetRetryWaitTime(5 * time.Second).
+            SetRetryMaxWaitTime(20 * time.Second).
+            SetRetryAfter(func(client *resty.Client, resp *resty.Response) (time.Duration, error) {
+                return 0, errors.New("quota exceeded")
+            })
+
+        // 调试
+        if debug {
+            // client.SetDebug(true)
+        }
+
+        // 创建请求
+        r := client.R()
+
+        // 设置内容长度
+        r.SetContentLength(true)
+
         if len(params) > 0 {
-            opts = append(opts, curl.WithParams(params))
+            // r.SetQueryParam("size", "large")
+            r.SetQueryParams(params)
+        }
+        if queryString != "" {
+            r.SetQueryString(queryString)
         }
         if bodyOk {
-            opts = append(opts, curl.WithBody(body))
+            r.SetBody(body)
         }
         if len(headers) > 0 {
-            opts = append(opts, curl.WithHeaders(headers))
+            r.SetHeaders(headers)
         }
-        if proxy != "" {
-            opts = append(opts, curl.WithProxy(proxy))
+        if len(cookies) > 0 {
+            for k, v := range cookies{
+                r.SetCookie(&http.Cookie{
+                    Name: k,
+                    Value: v,
+                })
+            }
+            // r.SetCookies(cookies)
         }
-        if cookies != "" {
-            opts = append(opts, curl.WithCookies(cookies))
+
+        // 文件上传
+        if len(files) > 0 {
+            // notesBytes, _ := ioutil.ReadFile("/Users/deatil/text-file.txt")
+            // r.SetFileReader("notes", "text-file.txt", bytes.NewReader(notesBytes))
+
+            // r.SetFile("profile_img", "/Users/deatil/test-img.png")
+            r.SetFiles(files)
         }
-        if charset != "" {
-            opts = append(opts, curl.WithResCharset(charset))
+
+        // 表单
+        if len(formDatas) > 0 {
+            r.SetFormData(formDatas)
         }
 
         // 方法名大写
         method = strings.ToUpper(method)
 
         // 请求
-        resp, err := curl.New().Request(
-            method,
-            url,
-            opts...,
-        )
+        resp, err := r.Execute(method, url)
         if err != nil {
             logger.Log().Error().Msg("[request]" + err.Error())
         }
 
         if debug {
-            respData, _ := resp.GetContents()
-            logger.Log().Info().Msg("[debug]url: " + url + ", method: " + method + ", res: " + respData)
+            respData := resp.Body()
+            logger.Log().Info().Msg("[debug]url: " + url + ", method: " + method + ", res: " + string(respData))
         }
     }
 }
