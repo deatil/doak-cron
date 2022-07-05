@@ -12,11 +12,6 @@ func FileExists(path string) bool {
     return err == nil || os.IsExist(err)
 }
 
-// 文件删除
-func FileDelete(path string) error {
-    return os.Remove(path)
-}
-
 // 获取数据
 func FileRead(path string) (string, error) {
     file, err := os.Open(path)
