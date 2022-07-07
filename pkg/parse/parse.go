@@ -16,18 +16,18 @@ import (
 )
 
 // 解析文件
-func MakeCron(path string, debug bool) []map[string]func() {
+func MakeCron(path string, debug bool) ([]map[string]func(), []map[string]any) {
     if !utils.FileExists(path) {
         logger.Log().Error().Msg("配置文件不存在")
 
-        return nil
+        return nil, nil
     }
 
     data, err := utils.FileRead(path)
     if err != nil {
         logger.Log().Error().Msg(err.Error())
 
-        return nil
+        return nil, nil
     }
 
     var v []map[string]any
@@ -35,7 +35,7 @@ func MakeCron(path string, debug bool) []map[string]func() {
     if err != nil {
         logger.Log().Error().Msg(err.Error())
 
-        return nil
+        return nil, nil
     }
 
     res := make([]map[string]func(), 0)
@@ -64,7 +64,7 @@ func MakeCron(path string, debug bool) []map[string]func() {
         }
     }
 
-    return res
+    return res, v
 }
 
 // 生成脚本
@@ -110,6 +110,18 @@ func MakeRequest(data map[string]any, debug bool) func() {
 
         // 创建客户端
         client := resty.New()
+
+        // 错误处理
+        client.OnError(func(req *resty.Request, err error) {
+            msg := ""
+            if v, ok := err.(*resty.ResponseError); ok {
+                msg = v.Err.Error()
+            } else {
+                msg = err.Error()
+            }
+
+            logger.Log().Error().Msg("[request]" + msg)
+        })
 
         // 过期时间
         if timeout > 0 {

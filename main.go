@@ -4,15 +4,17 @@ import (
     "os"
     "fmt"
     "log"
+    "time"
 
     "github.com/urfave/cli/v2"
 
     "github.com/deatil/doak-cron/pkg/cron"
     "github.com/deatil/doak-cron/pkg/parse"
+    "github.com/deatil/doak-cron/pkg/table"
 )
 
 // 版本号
-var version = "1.0.2"
+var version = "1.0.3"
 
 /**
  * go版本的通用计划任务
@@ -30,7 +32,7 @@ func main() {
         {
             Name:    "cron",
             Aliases: []string{"c"},
-            Usage:   "cron",
+            Usage:   "doak cron",
             Flags: []cli.Flag{
                 &cli.BoolFlag{Name: "debug", Aliases: []string{"d"}},
                 &cli.StringFlag{Name: "conf", Aliases: []string{"c"}},
@@ -39,12 +41,23 @@ func main() {
                 conf := ctx.String("conf")
                 debug := ctx.Bool("debug")
 
-                crons := parse.MakeCron(conf, debug)
+                crons, settings := parse.MakeCron(conf, debug)
                 if crons == nil {
                     fmt.Println("配置文件错误")
                     return nil
                 }
 
+                fmt.Println("\nDoak Cron v" + version)
+
+                loc, _ := time.LoadLocation("Asia/Shanghai")
+                nowTime := time.Now().
+                    In(loc).
+                    Format("2006-01-02 15:04:05")
+                fmt.Println(nowTime)
+
+                table.ShowTable(settings)
+
+                // 格式化
                 newCrons := make([]cron.Option, 0)
                 for _, v := range crons {
                     for kk, vv := range v {
@@ -55,8 +68,7 @@ func main() {
                     }
                 }
 
-                fmt.Println("任务执行中...")
-
+                // 执行计划任务
                 cron.AddCrons(newCrons)
 
                 return nil
