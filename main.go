@@ -4,7 +4,6 @@ import (
     "os"
     "fmt"
     "log"
-    "time"
 
     "github.com/urfave/cli/v2"
 
@@ -32,7 +31,7 @@ func main() {
         {
             Name:    "cron",
             Aliases: []string{"c"},
-            Usage:   "doak cron",
+            Usage:   "go版本的通用计划任务",
             Flags: []cli.Flag{
                 &cli.BoolFlag{Name: "debug", Aliases: []string{"d"}},
                 &cli.StringFlag{Name: "conf", Aliases: []string{"c"}},
@@ -47,15 +46,11 @@ func main() {
                     return nil
                 }
 
-                fmt.Println("\nDoak Cron v" + version)
+                fmt.Println("")
 
-                loc, _ := time.LoadLocation("Asia/Shanghai")
-                nowTime := time.Now().
-                    In(loc).
-                    Format("2006-01-02 15:04:05")
-                fmt.Println(nowTime)
-
-                table.ShowTable(settings)
+                // 显示详情
+                title := "Doak Cron v" + version
+                table.ShowTable(title, settings)
 
                 // 格式化
                 newCrons := make([]cron.Option, 0)

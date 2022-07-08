@@ -2,13 +2,14 @@ package table
 
 import (
     "os"
+    "time"
 
     "github.com/spf13/cast"
     "github.com/jedib0t/go-pretty/v6/table"
 )
 
 // 显示表格
-func ShowTable(settings []map[string]any) {
+func ShowTable(title string, settings []map[string]any) {
     // 显示计划任务信息
     newSettings := make([][]any, 0)
     if len(settings) > 0 {
@@ -30,13 +31,15 @@ func ShowTable(settings []map[string]any) {
         newSettings = append(newSettings, []any{1, "none", "-", "stop"})
     }
 
-    MakeTable(newSettings)
+    MakeTable(title, newSettings)
 }
 
 // 显示表格
-func MakeTable(data [][]any) {
+func MakeTable(title string, data [][]any) {
     t := table.NewWriter()
     t.SetOutputMirror(os.Stdout)
+
+    t.SetTitle(title)
 
     t.AppendHeader(table.Row{
         "#", "Type", "Spec", "Status",
@@ -56,6 +59,14 @@ func MakeTable(data [][]any) {
             i++
         }
     }
+
+    loc, _ := time.LoadLocation("Asia/Shanghai")
+    nowTime := time.Now().
+        In(loc).
+        Format("2006-01-02 15:04:05")
+
+    caption := "Start At " + nowTime + ".\n"
+    t.SetCaption(caption)
 
     t.Render()
 }

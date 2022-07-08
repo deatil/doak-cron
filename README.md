@@ -33,6 +33,11 @@ main.exe cron ver
 `cron.json` 为计划任务配置文件，默认需要自己创建。当前支持脚本和 `curl` 两种方式
 
 
+### 使用预览
+
+![doak-cron](https://user-images.githubusercontent.com/24578855/178015825-085022c0-cb19-4d51-ad66-bac2a4c0b527.jpg)
+
+
 ### 特别鸣谢
 
 感谢以下的项目,排名不分先后
