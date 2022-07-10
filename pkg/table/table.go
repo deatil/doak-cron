@@ -24,11 +24,12 @@ func ShowTable(title string, settings []map[string]any) {
 
             typ := cast.ToString(v["type"])
             spec := cast.ToString(v["spec"])
+            cronId := v["cron_id"]
 
-            newSettings = append(newSettings, []any{k+1, typ, spec, status})
+            newSettings = append(newSettings, []any{k+1, cronId, typ, spec, status})
         }
     } else {
-        newSettings = append(newSettings, []any{1, "none", "-", "stop"})
+        newSettings = append(newSettings, []any{1, "0", "none", "-", "stop"})
     }
 
     MakeTable(title, newSettings)
@@ -42,7 +43,7 @@ func MakeTable(title string, data [][]any) {
     t.SetTitle(title)
 
     t.AppendHeader(table.Row{
-        "#", "Type", "Spec", "Status",
+        "#", "Cron_Id", "Type", "Spec", "Status",
     })
 
     num := len(data)

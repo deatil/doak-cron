@@ -2,7 +2,7 @@
     {
         "type":"cmd",
         "spec":"*/5 * * * * *",
-        "cmd":"main.exe"
+        "cmd":"doak-cron.exe"
     },
     {
         "type":"request",

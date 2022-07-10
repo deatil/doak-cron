@@ -10,15 +10,16 @@ import (
     "github.com/deatil/doak-cron/pkg/cron"
     "github.com/deatil/doak-cron/pkg/parse"
     "github.com/deatil/doak-cron/pkg/table"
+    "github.com/deatil/doak-cron/pkg/logger"
 )
 
 // 版本号
-var version = "1.0.3"
+var version = "1.0.5"
 
 /**
  * go版本的通用计划任务
  *
- * > go run main.go cron --conf="./cron.json" --debug
+ * > go run main.go cron --conf="./cron.json" --log="./cron.log" --debug
  * > go run main.go cron ver
  *
  * @create 2022-6-29
@@ -35,8 +36,15 @@ func main() {
             Flags: []cli.Flag{
                 &cli.BoolFlag{Name: "debug", Aliases: []string{"d"}},
                 &cli.StringFlag{Name: "conf", Aliases: []string{"c"}},
+                &cli.StringFlag{Name: "log", Aliases: []string{"l"}},
             },
             Action: func(ctx *cli.Context) error {
+                // 设置日志存储文件
+                log := ctx.String("log")
+                if log != "" {
+                    logger.WithLogFile(log)
+                }
+
                 conf := ctx.String("conf")
                 debug := ctx.Bool("debug")
 
@@ -46,25 +54,25 @@ func main() {
                     return nil
                 }
 
-                fmt.Println("")
-
-                // 显示详情
-                title := "Doak Cron v" + version
-                table.ShowTable(title, settings)
-
-                // 格式化
-                newCrons := make([]cron.Option, 0)
-                for _, v := range crons {
-                    for kk, vv := range v {
-                        newCrons = append(newCrons, cron.Option{
-                            Spec: kk,
-                            Cmd:  vv,
-                        })
-                    }
-                }
-
                 // 执行计划任务
-                cron.AddCrons(newCrons)
+                cron.AddCron(func(croner *cron.Cron) {
+                    if len(crons) > 0 {
+                        for k, c := range crons {
+                            cronId, err := croner.AddFunc(c.Spec, c.Cmd)
+                            if err != nil{
+                                 logger.Log().Error().Msg("[cron]" + err.Error())
+                            }
+
+                            settings[k]["cron_id"] = cronId
+                        }
+                    }
+
+                    fmt.Println("")
+
+                    // 显示详情
+                    title := "Doak Cron v" + version
+                    table.ShowTable(title, settings)
+                })
 
                 return nil
             },

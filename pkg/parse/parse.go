@@ -15,8 +15,17 @@ import (
     "github.com/deatil/doak-cron/pkg/logger"
 )
 
+// 数据
+type Data struct {
+    // 时间
+    Spec string
+
+    // 脚本
+    Cmd func()
+}
+
 // 解析文件
-func MakeCron(path string, debug bool) ([]map[string]func(), []map[string]any) {
+func MakeCron(path string, debug bool) (res []Data, v []map[string]any) {
     if !utils.FileExists(path) {
         logger.Log().Error().Msg("配置文件不存在")
 
@@ -30,7 +39,6 @@ func MakeCron(path string, debug bool) ([]map[string]func(), []map[string]any) {
         return nil, nil
     }
 
-    var v []map[string]any
     err = jsoniter.Unmarshal([]byte(data), &v)
     if err != nil {
         logger.Log().Error().Msg(err.Error())
@@ -38,7 +46,6 @@ func MakeCron(path string, debug bool) ([]map[string]func(), []map[string]any) {
         return nil, nil
     }
 
-    res := make([]map[string]func(), 0)
     if len(v) > 0 {
         for _, vv := range v {
             if _, ok := vv["type"]; !ok {
@@ -53,18 +60,20 @@ func MakeCron(path string, debug bool) ([]map[string]func(), []map[string]any) {
 
             switch typ {
                 case "cmd":
-                    res = append(res, map[string]func(){
-                        spec: MakeCmd(vv, debug),
+                    res = append(res, Data{
+                        Spec: spec,
+                        Cmd: MakeCmd(vv, debug),
                     })
                 case "request":
-                    res = append(res, map[string]func(){
-                        spec: MakeRequest(vv, debug),
+                    res = append(res, Data{
+                        Spec: spec,
+                        Cmd: MakeRequest(vv, debug),
                     })
             }
         }
     }
 
-    return res, v
+    return
 }
 
 // 生成脚本

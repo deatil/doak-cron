@@ -8,10 +8,28 @@ import (
 )
 
 var (
-    log *zerolog.Logger
-
+    log  *zerolog.Logger
     once sync.Once
+
+    mu   sync.RWMutex
+    file string = "./cron.log"
 )
+
+// 设置日志存储文件
+func WithLogFile(f string) {
+    mu.Lock()
+    defer mu.Unlock()
+
+    file = f
+}
+
+// 获取日志存储文件
+func GetLogFile() string {
+    mu.RLock()
+    defer mu.RUnlock()
+
+    return file
+}
 
 // Log().Trace().Msg("test TRACE")
 // Log().Debug().Msg("test DEBUG")
@@ -21,7 +39,7 @@ var (
 // Log().Fatal().Msg("test FATAL")
 func Log() *zerolog.Logger {
     once.Do(func() {
-        file := "./cron.log"
+        file := GetLogFile()
 
         log = Manager(file)
     })
