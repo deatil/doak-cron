@@ -1,10 +1,12 @@
 [
     {
+        "name":"执行脚本",
         "type":"cmd",
         "spec":"*/5 * * * * *",
         "cmd":"doak-cron.exe"
     },
     {
+        "name":"GET请求",
         "type":"request",
         "spec":"*/5 * * * * *",
         "url":"http://test.test1000.com/12.php",
@@ -29,6 +31,7 @@
         }
     },
     {
+        "name":"上传文件",
         "type":"request",
         "spec":"*/6 * * * * *",
         "url":"http://test.test1000.com/13.php",

@@ -1,4 +1,5 @@
-package goch
+~~~go
+package casts
 
 import "time"
 
@@ -168,3 +169,4 @@ func ToDurationSlice(i any) []time.Duration {
     v, _ := ToDurationSliceE(i)
     return v
 }
+~~~

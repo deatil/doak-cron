@@ -35,7 +35,7 @@ main.exe cron ver
 
 ### 使用预览
 
-![doak-cron](https://user-images.githubusercontent.com/24578855/178015825-085022c0-cb19-4d51-ad66-bac2a4c0b527.jpg)
+![doak-cron](https://user-images.githubusercontent.com/24578855/178781346-af72bea7-3210-4138-840c-3138408147ef.jpg)
 
 
 ### 特别鸣谢

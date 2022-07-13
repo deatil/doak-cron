@@ -22,20 +22,25 @@ func ShowTable(title string, settings []map[string]any) {
                 status = "stop"
             }
 
+            name := cast.ToString(v["name"])
             typ := cast.ToString(v["type"])
             spec := cast.ToString(v["spec"])
             cronId := v["cron_id"]
 
-            newSettings = append(newSettings, []any{k+1, cronId, typ, spec, status})
+            if name == "" {
+                name = typ
+            }
+
+            newSettings = append(newSettings, []any{k+1, name, cronId, typ, spec, status})
         }
     } else {
-        newSettings = append(newSettings, []any{1, "0", "none", "-", "stop"})
+        newSettings = append(newSettings, []any{1, "none", "0", "none", "-", "stop"})
     }
 
     MakeTable(title, newSettings)
 }
 
-// 显示表格
+// 生成表格
 func MakeTable(title string, data [][]any) {
     t := table.NewWriter()
     t.SetOutputMirror(os.Stdout)
@@ -43,7 +48,7 @@ func MakeTable(title string, data [][]any) {
     t.SetTitle(title)
 
     t.AppendHeader(table.Row{
-        "#", "Cron_Id", "Type", "Spec", "Status",
+        "#", "Name", "Cron_Id", "Type", "Spec", "Status",
     })
 
     num := len(data)

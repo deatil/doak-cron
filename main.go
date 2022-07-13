@@ -14,11 +14,12 @@ import (
 )
 
 // 版本号
-var version = "1.0.5"
+var version = "1.0.6"
 
 /**
  * go版本的通用计划任务
  *
+ * > go run main.go cron --conf="./cron.json" --debug
  * > go run main.go cron --conf="./cron.json" --log="./cron.log" --debug
  * > go run main.go cron ver
  *
