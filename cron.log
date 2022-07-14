@@ -1,0 +1,2 @@
+{"level":"error","time":"2022-07-14T11:28:05+08:00","caller":"D:/app/workroom/go/go-app/project/doak-cron/pkg/parse/parse.go:87","message":"[cmd]exec: \"doak-cron.exe\": executable file not found in %PATH%"}
+{"level":"info","time":"2022-07-14T11:28:05+08:00","caller":"D:/app/workroom/go/go-app/project/doak-cron/pkg/parse/parse.go:91","message":"[debug]cmd: doak-cron.exe, res: "}

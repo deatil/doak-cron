@@ -23,6 +23,10 @@ var version = "1.0.6"
  * > go run main.go cron --conf="./cron.json" --log="./cron.log" --debug
  * > go run main.go cron ver
  *
+ * > main.exe cron --conf="./cron.json" --debug
+ * > main.exe cron --conf="./cron.json" --log="./cron.log" --debug
+ * > main.exe cron ver
+ *
  * @create 2022-6-29
  * @author deatil
  */
