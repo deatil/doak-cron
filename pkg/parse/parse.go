@@ -171,6 +171,9 @@ func MakeRequest(data map[string]any, debug bool) func() {
             // client.SetDebug(true)
         }
 
+        // 关闭命令行报错提示
+        // client.SetDisableWarn(true)
+
         // 创建请求
         r := client.R()
 

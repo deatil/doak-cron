@@ -28,7 +28,7 @@ main.exe cron --conf="./cron.json" --debug
 main.exe cron ver
 ```
 
-3. 使用
+3. 配置使用
 
 `cron.json` 为计划任务配置文件，默认需要自己创建。当前支持脚本和 `curl` 两种方式
 
@@ -51,6 +51,8 @@ main.exe cron ver
  - github.com/rs/zerolog
 
  - github.com/spf13/cast
+
+ - github.com/jedib0t/go-pretty
 
 
 ### 开源协议

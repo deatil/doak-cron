@@ -11,8 +11,15 @@ type (
 
 // 添加计划任务
 func AddCron(fn func(*cron.Cron)) {
+    logger := cron.PrintfLogger(NewLogger())
+    // logger := VerbosePrintfLogger(NewLogger())
+
     // 创建一个cron实例
-    newCron := cron.New(cron.WithSeconds())
+    newCron := cron.New(
+        cron.WithSeconds(),
+        cron.WithLogger(logger),
+        cron.WithChain(cron.Recover(logger)),
+    )
 
     // 添加计划任务
     fn(newCron)
