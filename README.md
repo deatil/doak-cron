@@ -9,7 +9,7 @@
 *  最小设置单位为秒
 
 
-### 使用方法 
+### 使用方法
 
 1. 构建对应系统的文件。交叉编译可查看文档 `/docs/go-build.md`
 
@@ -26,7 +26,7 @@ main.exe cron --conf="./cron.json" --debug
 
 查看当前版本号
 ```go
-main.exe cron ver
+main.exe cron version
 ```
 
 3. 配置使用

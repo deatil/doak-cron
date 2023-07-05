@@ -3,7 +3,8 @@ module github.com/deatil/doak-cron
 go 1.18
 
 require (
-	github.com/axgle/mahonia v0.0.0-20180208002826-3358181d7394
+	github.com/go-resty/resty/v2 v2.7.0
+	github.com/jedib0t/go-pretty/v6 v6.3.3
 	github.com/json-iterator/go v1.1.12
 	github.com/robfig/cron/v3 v3.0.0
 	github.com/rs/zerolog v1.27.0
@@ -13,8 +14,6 @@ require (
 
 require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
-	github.com/go-resty/resty/v2 v2.7.0 // indirect
-	github.com/jedib0t/go-pretty/v6 v6.3.3 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mattn/go-runewidth v0.0.13 // indirect

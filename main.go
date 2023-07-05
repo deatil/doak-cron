@@ -14,18 +14,18 @@ import (
 )
 
 // 版本号
-var version = "1.0.7"
+var version = "1.0.8"
 
 /**
  * go版本的通用计划任务
  *
  * > go run main.go cron --conf="./cron.json" --debug
  * > go run main.go cron --conf="./cron.json" --log="./cron.log" --debug
- * > go run main.go cron ver
+ * > go run main.go cron version
  *
  * > main.exe cron --conf="./cron.json" --debug
  * > main.exe cron --conf="./cron.json" --log="./cron.log" --debug
- * > main.exe cron ver
+ * > main.exe cron version
  *
  * @create 2022-6-29
  * @author deatil
@@ -83,7 +83,7 @@ func main() {
             },
             Subcommands: []*cli.Command{
                 {
-                    Name:  "ver",
+                    Name:  "version",
                     Usage: "显示计划任务版本号",
                     Action: func(ctx *cli.Context) error {
                         fmt.Println("计划任务当前版本号为: ", version)
