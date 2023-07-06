@@ -1,8 +1,8 @@
 Go交叉编译(Go语言Mac/Linux/Windows下交叉编译)
 
 ~~~cmd
-GOOS：目标平台的操作系统（darwin、freebsd、linux、windows） 
-GOARCH：目标平台的体系架构（386、amd64、arm） 
+GOOS：目标平台的操作系统（darwin、freebsd、linux、windows）
+GOARCH：目标平台的体系架构（386、amd64、arm）
 交叉编译不支持 CGO 所以要禁用它
 ~~~
 
@@ -12,7 +12,7 @@ GOARCH：目标平台的体系架构（386、amd64、arm）
 ~~~cmd
 CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build main.go
 ~~~
- 
+
 ### Windows
 ~~~cmd
 CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build main.go
@@ -25,7 +25,7 @@ CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build main.go
 ~~~cmd
 CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build main.go
 ~~~
- 
+
 ### Windows
 ~~~cmd
 CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build main.go
@@ -40,7 +40,7 @@ SET GOOS=darwin
 SET GOARCH=amd64
 go build main.go
 ~~~
- 
+
 ### Linux
 ~~~cmd
 SET CGO_ENABLED=0
@@ -51,7 +51,9 @@ go build main.go
 
 ### 编译为Window可运行文件
 ~~~cmd
+SET CGO_ENABLED=0
 SET GOOS=windows
+SET GOARCH=amd64
 go build main.go
 ~~~
 

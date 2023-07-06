@@ -19,13 +19,15 @@ var version = "1.0.8"
 /**
  * go版本的通用计划任务
  *
+ * > go run main.go cron -c="./cron.json" -l="./cron.log" -d
  * > go run main.go cron --conf="./cron.json" --debug
  * > go run main.go cron --conf="./cron.json" --log="./cron.log" --debug
  * > go run main.go cron version
  *
- * > main.exe cron --conf="./cron.json" --debug
- * > main.exe cron --conf="./cron.json" --log="./cron.log" --debug
- * > main.exe cron version
+ * > ./main.exe cron -c="./cron.json" -l="./cron.log" -d
+ * > ./main.exe cron --conf="./cron.json" --debug
+ * > ./main.exe cron --conf="./cron.json" --log="./cron.log" --debug
+ * > ./main.exe cron version
  *
  * @create 2022-6-29
  * @author deatil
@@ -37,7 +39,7 @@ func main() {
         {
             Name:    "cron",
             Aliases: []string{"c"},
-            Usage:   "go版本的通用计划任务",
+            Usage:   "计划任务管理器",
             Flags: []cli.Flag{
                 &cli.BoolFlag{Name: "debug", Aliases: []string{"d"}},
                 &cli.StringFlag{Name: "conf", Aliases: []string{"c"}},
@@ -50,7 +52,12 @@ func main() {
                     logger.WithLogFile(log)
                 }
 
+                // 配置文件，为空时使用默认
                 conf := ctx.String("conf")
+                if conf == "" {
+                    conf = "./cron.json"
+                }
+
                 debug := ctx.Bool("debug")
 
                 crons, settings := parse.MakeCron(conf, debug)
