@@ -2,7 +2,7 @@ name: build-binary
 
 on:
   release:
-    types: [created,published]
+    types: [created]
 
 jobs:
   build-binary:
@@ -10,19 +10,20 @@ jobs:
     strategy:
       matrix:
         goos: [linux, windows, darwin]
-        goarch: [amd64, arm64]
+        goarch: ["386", amd64]
         exclude:
-          - goarch: arm64
+          - goarch: "386"
             goos: windows
-          - goarch: amd64
+          - goarch: "386"
             goos: darwin
     steps:
-      - uses: actions/checkout@v3
-      - uses: wangyoucao577/go-release-action@v1.46
+      - uses: actions/checkout@v4
+      - uses: wangyoucao577/go-release-action@v1.4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           goos: ${{ matrix.goos }}
           goarch: ${{ matrix.goarch }}
           goversion: 1.20
           binary_name: "doak-cron"
+          build_flags: -v
           extra_files: README.md cron.json LICENSE
