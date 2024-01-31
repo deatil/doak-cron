@@ -2,7 +2,7 @@ name: build-binary
 
 on:
   release:
-    types: [created, published]
+    types: [published]
 
 jobs:
   build-binary:
@@ -11,6 +11,8 @@ jobs:
       matrix:
         goos: [linux, windows, darwin]
         goarch: [amd64, arm64]
+          - goarch: arm64
+            goos: windows
     steps:
       - uses: actions/checkout@v3
       - uses: wangyoucao577/go-release-action@v1.30
