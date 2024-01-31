@@ -17,12 +17,11 @@ jobs:
         goarch: [amd64]
     steps:
       - uses: actions/checkout@v4
-      - uses: wangyoucao577/go-release-action@v1.30
+      - uses: wangyoucao577/go-release-action@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           goos: ${{ matrix.goos }}
           goarch: ${{ matrix.goarch }}
-          goversion: 1.20
           binary_name: "doak-cron"
           build_flags: -v
           extra_files: README.md cron.json LICENSE
