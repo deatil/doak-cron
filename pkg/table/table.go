@@ -66,10 +66,15 @@ func MakeTable(title string, data [][]any) {
         }
     }
 
-    loc, _ := time.LoadLocation("Asia/Shanghai")
-    nowTime := time.Now().
-        In(loc).
-        Format("2006-01-02 15:04:05")
+	loc, err := time.LoadLocation("Asia/Shanghai")
+    if err != nil {
+        loc = time.UTC
+    }
+
+	nowTime := time.Now().
+		UTC().
+		In(loc).
+		Format("2006-01-02 15:04:05")
 
     caption := "Start At " + nowTime + ".\n"
     t.SetCaption(caption)
