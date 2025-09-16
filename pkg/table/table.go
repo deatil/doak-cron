@@ -9,7 +9,7 @@ import (
 )
 
 // 显示表格
-func ShowTable(title string, settings []map[string]any) {
+func ShowTable(title string, loc string, settings []map[string]any) {
     // 显示计划任务信息
     newSettings := make([][]any, 0)
     if len(settings) > 0 {
@@ -37,11 +37,11 @@ func ShowTable(title string, settings []map[string]any) {
         newSettings = append(newSettings, []any{1, "none", "0", "none", "-", "stop"})
     }
 
-    MakeTable(title, newSettings)
+    makeTable(title, loc, newSettings)
 }
 
 // 生成表格
-func MakeTable(title string, data [][]any) {
+func makeTable(title string, setLoc string, data [][]any) {
     t := table.NewWriter()
     t.SetOutputMirror(os.Stdout)
 
@@ -66,12 +66,20 @@ func MakeTable(title string, data [][]any) {
         }
     }
 
-    loc, _ := time.LoadLocation("Asia/Shanghai")
+    if setLoc == "" {
+        setLoc = "Asia/Shanghai"
+    }
+
+    loc, err := time.LoadLocation(setLoc)
+    if err != nil {
+        loc = time.UTC
+    }
+
     nowTime := time.Now().
         In(loc).
-        Format("2006-01-02 15:04:05")
+        Format("2006-01-02 15:04:05 ")
 
-    caption := "Start At " + nowTime + ".\n"
+    caption := "Start At " + nowTime + loc.String() + ".\n"
     t.SetCaption(caption)
 
     t.Render()

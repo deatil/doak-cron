@@ -14,7 +14,7 @@ import (
 )
 
 // 版本号
-var version = "1.0.8"
+var version = "1.1.0"
 
 /**
  * go版本的通用计划任务
@@ -22,11 +22,13 @@ var version = "1.0.8"
  * > go run main.go cron -c="./cron.json" -l="./cron.log" -d
  * > go run main.go cron --conf="./cron.json" --debug
  * > go run main.go cron --conf="./cron.json" --log="./cron.log" --debug
+ * > go run main.go cron --conf="./cron.json" --loc="Asia/Shanghai"
  * > go run main.go cron version
  *
  * > ./main.exe cron -c="./cron.json" -l="./cron.log" -d
  * > ./main.exe cron --conf="./cron.json" --debug
  * > ./main.exe cron --conf="./cron.json" --log="./cron.log" --debug
+ * > ./main.exe cron --conf="./cron.json" --loc="Asia/Shanghai"
  * > ./main.exe cron version
  *
  * @create 2022-6-29
@@ -44,6 +46,7 @@ func main() {
                 &cli.BoolFlag{Name: "debug", Aliases: []string{"d"}},
                 &cli.StringFlag{Name: "conf", Aliases: []string{"c"}},
                 &cli.StringFlag{Name: "log", Aliases: []string{"l"}},
+                &cli.StringFlag{Name: "loc", Aliases: []string{"z"}},
             },
             Action: func(ctx *cli.Context) error {
                 // 设置日志存储文件
@@ -81,9 +84,14 @@ func main() {
 
                     fmt.Println("")
 
+                    loc := ctx.String("loc")
+                    if loc == "" {
+                        loc = "Asia/Shanghai"
+                    }
+
                     // 显示详情
                     title := "Doak Cron v" + version
-                    table.ShowTable(title, settings)
+                    table.ShowTable(title, loc, settings)
                 })
 
                 return nil
