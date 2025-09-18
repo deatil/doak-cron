@@ -14,7 +14,7 @@ import (
 )
 
 // 版本号
-var version = "1.1.0"
+var version = "1.1.1"
 
 /**
  * go版本的通用计划任务
@@ -86,7 +86,7 @@ func main() {
 
                     loc := ctx.String("loc")
                     if loc == "" {
-                        loc = "Asia/Shanghai"
+                        loc = "Local"
                     }
 
                     // 显示详情

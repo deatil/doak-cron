@@ -67,7 +67,7 @@ func makeTable(title string, setLoc string, data [][]any) {
     }
 
     if setLoc == "" {
-        setLoc = "Asia/Shanghai"
+        setLoc = "Local"
     }
 
     loc, err := time.LoadLocation(setLoc)
